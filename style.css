@@ -1,0 +1,410 @@
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    background: #87ceeb;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+body {
+    touch-action: none;
+}
+
+
+/* =========================================================
+   ÁREA DO JOGO
+========================================================= */
+
+#game {
+    position: fixed;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    z-index: 1;
+}
+
+#game canvas {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+}
+
+
+/* =========================================================
+   HUD
+========================================================= */
+
+.hud {
+    position: fixed;
+
+    z-index: 100;
+
+    top: 18px;
+    left: 18px;
+    right: 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    pointer-events: none;
+}
+
+.hud-card {
+    min-width: 110px;
+
+    padding: 9px 15px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(10, 15, 20, 0.72);
+
+    color: white;
+
+    backdrop-filter: blur(8px);
+
+    box-shadow:
+        0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.hud-card span {
+    display: inline;
+
+    font-size: 10px;
+
+    letter-spacing: 1.5px;
+
+    opacity: 0.7;
+}
+
+.hud-card > strong {
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 22px;
+}
+
+
+/* =========================================================
+   CONTROLES
+========================================================= */
+
+.controls {
+    position: fixed;
+
+    z-index: 150;
+
+    top: 18px;
+    right: 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    pointer-events: auto;
+}
+
+
+/* =========================================================
+   BOTÕES
+========================================================= */
+
+button {
+    border: 0;
+
+    border-radius: 10px;
+
+    padding: 12px 16px;
+
+    background: #202830;
+
+    color: white;
+
+    font-weight: 700;
+
+    font-size: 13px;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.12s ease,
+        background 0.12s ease,
+        opacity 0.12s ease;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+button:hover {
+    background: #303b45;
+}
+
+button:active {
+    transform: scale(0.96);
+}
+
+button:disabled {
+    cursor: not-allowed;
+
+    opacity: 0.65;
+}
+
+
+/* =========================================================
+   BOTÃO CONECTAR ESP32
+========================================================= */
+
+#connectBtn {
+    display: block;
+
+    pointer-events: auto;
+
+    background: #087f5b;
+
+    color: white;
+
+    box-shadow:
+        0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+#connectBtn:hover {
+    background: #099268;
+}
+
+
+/* =========================================================
+   STATUS SERIAL
+========================================================= */
+
+#serialStatus {
+    position: fixed;
+
+    z-index: 150;
+
+    left: 14px;
+    bottom: 14px;
+
+    padding: 8px 11px;
+
+    border-radius: 8px;
+
+    background:
+        rgba(10, 15, 20, 0.72);
+
+    color: white;
+
+    font-size: 12px;
+
+    backdrop-filter: blur(6px);
+
+    box-shadow:
+        0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+
+/* =========================================================
+   TELA DE MENSAGEM
+========================================================= */
+
+#message {
+    position: fixed;
+
+    z-index: 200;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    width: min(440px, 88vw);
+
+    padding: 30px;
+
+    text-align: center;
+
+    color: white;
+
+    background:
+        rgba(10, 15, 20, 0.82);
+
+    border-radius: 20px;
+
+    backdrop-filter: blur(12px);
+
+    box-shadow:
+        0 20px 60px
+        rgba(0, 0, 0, 0.35);
+}
+
+#messageIcon {
+    font-size: 48px;
+
+    margin-bottom: 8px;
+}
+
+#message h1 {
+    margin: 0 0 10px;
+
+    font-size: 28px;
+
+    letter-spacing: 2px;
+}
+
+#message p {
+    margin: 0 0 22px;
+
+    line-height: 1.5;
+
+    opacity: 0.82;
+}
+
+
+/* =========================================================
+   BOTÃO INICIAR
+========================================================= */
+
+#startBtn {
+    background: #e03131;
+
+    font-size: 15px;
+
+    padding:
+        13px 22px;
+
+    box-shadow:
+        0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+#startBtn:hover {
+    background: #f03e3e;
+}
+
+
+/* =========================================================
+   RESPONSIVO
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .hud {
+        top: 10px;
+
+        left: 10px;
+        right: 10px;
+
+        gap: 6px;
+    }
+
+    .hud-card {
+        min-width: 75px;
+
+        padding: 7px 9px;
+    }
+
+    .hud-card span {
+        font-size: 8px;
+    }
+
+    .hud-card > strong {
+        font-size: 16px;
+    }
+
+    .controls {
+        top: 65px;
+
+        right: 10px;
+    }
+
+    #connectBtn {
+        padding: 9px 10px;
+
+        font-size: 10px;
+    }
+
+    #serialStatus {
+        left: 10px;
+
+        bottom: 10px;
+
+        font-size: 11px;
+    }
+
+    #message {
+        padding: 25px 20px;
+    }
+
+    #message h1 {
+        font-size: 22px;
+    }
+
+    #messageIcon {
+        font-size: 40px;
+    }
+}
+
+
+/* =========================================================
+   TELAS MUITO PEQUENAS
+========================================================= */
+
+@media (max-width: 420px) {
+
+    .hud {
+        gap: 4px;
+    }
+
+    .hud-card {
+        min-width: 65px;
+
+        padding: 6px 7px;
+    }
+
+    .hud-card span {
+        font-size: 7px;
+
+        letter-spacing: 1px;
+    }
+
+    .hud-card > strong {
+        font-size: 14px;
+    }
+
+    #connectBtn {
+        font-size: 9px;
+
+        padding:
+            8px 9px;
+    }
+}
+

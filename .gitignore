@@ -1,0 +1,129 @@
+# ============================================================
+
+# NODE / NPM
+
+# ============================================================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ============================================================
+
+# AMBIENTE / CONFIGURAÇÕES LOCAIS
+
+# ============================================================
+
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ============================================================
+
+# SISTEMA OPERACIONAL
+
+# ============================================================
+
+# Windows
+
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+
+.DS_Store
+
+# Linux
+
+*~
+
+# ============================================================
+
+# VS CODE
+
+# ============================================================
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# ============================================================
+
+# BUILD / DIST
+
+# ============================================================
+
+dist/
+build/
+.cache/
+.temp/
+.tmp/
+
+# ============================================================
+
+# LOGS
+
+# ============================================================
+
+*.log
+
+# ============================================================
+
+# ARQUIVOS DE BACKUP / TEMPORÁRIOS
+
+# ============================================================
+
+*.bak
+*.tmp
+*.temp
+*.old
+
+# ============================================================
+
+# MODELOS GLB
+
+# ============================================================
+
+# NÃO ignorar os modelos usados pelo jogo.
+
+# O carro.glb e demais arquivos .glb necessários
+
+# devem ser enviados para o GitHub.
+
+# Ignorar apenas backups e versões intermediárias:
+
+models/carro-original.glb
+models/carro-otimizado.glb
+models/carro-game.glb
+
+# A versão final usada pelo jogo NÃO deve ser ignorada:
+
+# models/carro-game-comprimido.glb
+
+# ============================================================
+
+# ARQUIVOS DE IDE / EDITOR
+
+# ============================================================
+
+.idea/
+*.swp
+*.swo
+EOF
+
+# ============================================================
+
+# ARQUIVOS DE TESTE / SISTEMA
+
+# ============================================================
+
+coverage/
+.nyc_output/
+*.pid
+*.seed
+*.pid.lock

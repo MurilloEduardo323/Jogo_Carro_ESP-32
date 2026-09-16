@@ -1,0 +1,191 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no"
+    >
+
+    <title>Volante MPU6050 3D</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- =========================================================
+         IMPORT MAP
+         ========================================================= -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+
+<body>
+
+    <!-- =========================================================
+         JOGO 3D
+         ========================================================= -->
+    <div id="game"></div>
+
+
+    <!-- =========================================================
+         HUD
+         ========================================================= -->
+    <div class="hud">
+
+        <div class="hud-card">
+            <span>PONTOS</span>
+            <strong id="score">0</strong>
+        </div>
+
+        <div class="hud-card">
+            <span>VELOCIDADE</span>
+            <strong>
+                <span id="speed">0</span> km/h
+            </strong>
+        </div>
+
+        <div class="hud-card">
+            <span>DIREÇÃO</span>
+            <strong>
+                <span id="steerValue">0</span>%
+            </strong>
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         CONTROLE DO VOLANTE / SERIAL
+         ========================================================= -->
+
+    <div
+        id="serialStatus"
+        class="serial-status"
+    >
+        🔴 Volante não conectado
+    </div>
+
+
+    <div class="controls">
+
+        <button
+            id="connectBtn"
+            type="button"
+        >
+            🎮 CONECTAR VOLANTE
+        </button>
+
+    </div>
+
+
+    <!-- =========================================================
+         MENSAGEM / INÍCIO / GAME OVER
+         ========================================================= -->
+
+    <div
+        id="message"
+        class="message"
+    >
+
+        <div class="message-box">
+
+            <div
+                id="messageIcon"
+                class="message-icon"
+            >
+                🏎️
+            </div>
+
+            <h1 id="messageTitle">
+                Volante MPU6050 3D
+            </h1>
+
+            <p id="messageText">
+                Conecte o volante e clique em iniciar para jogar.
+            </p>
+
+            <button
+                id="startBtn"
+                type="button"
+            >
+                INICIAR JOGO
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         THREE.JS + GLTFLOADER
+         ========================================================= -->
+
+    <script type="module">
+
+        import * as THREE from "three";
+
+        import {
+            GLTFLoader
+        } from "three/addons/loaders/GLTFLoader.js";
+
+
+        /*
+         * O game.js é um script JavaScript normal.
+         *
+         * Por isso disponibilizamos:
+         *
+         * window.THREE
+         * window.GLTFLoader
+         *
+         * para que ele consiga utilizar os dois.
+         */
+
+        window.THREE = THREE;
+
+        window.GLTFLoader = GLTFLoader;
+
+
+        /*
+         * Carrega o game.js somente depois que:
+         *
+         * THREE
+         * GLTFLoader
+         *
+         * já estão disponíveis.
+         */
+
+        const gameScript =
+            document.createElement("script");
+
+        gameScript.src = "game.js";
+
+        gameScript.onload = function () {
+
+            console.log(
+                "✅ game.js carregado com sucesso"
+            );
+
+        };
+
+        gameScript.onerror = function () {
+
+            console.error(
+                "❌ Erro ao carregar game.js"
+            );
+
+        };
+
+        document.body.appendChild(gameScript);
+
+    </script>
+
+</body>
+</html>
+```
