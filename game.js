@@ -2066,136 +2066,97 @@ function updateHUD() {
 // ============================================================
 // INICIAR JOGO
 // ============================================================
-
 function startGame() {
-
-    // --------------------------------------------------------
-    // REMOVE OBSTÁCULOS
-    // --------------------------------------------------------
-
-    for (
-        const obstacle of obstacles
-    ) {
-
-        obstacleGroup.remove(
-            obstacle
-        );
+    // Remove todos os obstáculos antigos
+    for (const obstacle of obstacles) {
+        obstacleGroup.remove(obstacle);
     }
-
 
     obstacles.length = 0;
 
-
-    // --------------------------------------------------------
-    // RESET
-    // --------------------------------------------------------
+    // ============================================================
+    // RESET DO JOGO
+    // ============================================================
 
     score = 0;
-
     distance = 0;
-
     gameSpeed = 22;
-
     obstacleTimer = 0;
 
-
     carX = 0;
-
     targetCarX = 0;
 
+    // ============================================================
+    // RESET DO CARRO
+    // ============================================================
 
     car.position.x = 0;
-
     car.position.z = 5;
 
-
     car.rotation.z = 0;
-
     car.rotation.y = 0;
 
+    // ============================================================
+    // RESET DA ESTRADA INFINITA
+    // ============================================================
+
+    if (roadGroup) {
+        roadGroup.children.forEach((segment, index) => {
+            segment.position.z =
+                -index * ROAD_SEGMENT_LENGTH;
+        });
+    }
+
+    // ============================================================
+    // RESET DO CENÁRIO
+    // ============================================================
+
+    // Como árvores, arbustos e montanhas estão dentro
+    // dos próprios segmentos da estrada, eles acompanham
+    // automaticamente o reset acima.
+    
+    // ============================================================
+    // INICIA O JOGO
+    // ============================================================
 
     gameRunning = true;
 
-
-    // --------------------------------------------------------
-    // MENSAGEM
-    // --------------------------------------------------------
-
-    messageIcon.textContent =
-        "🏎️";
-
+    messageIcon.textContent = "🏎️";
 
     messageTitle.textContent =
         "Volante MPU6050 3D";
 
-
     messageText.textContent =
         "Dirija e desvie dos obstáculos!";
-
 
     startBtn.textContent =
         "JOGAR NOVAMENTE";
 
+    message.style.display = "none";
 
-    message.style.display =
-        "none";
+    // ============================================================
+    // OBSTÁCULOS INICIAIS
+    // ============================================================
 
+    spawnObstacle(95);
+    spawnObstacle(190);
+    spawnObstacle(290);
 
-    // --------------------------------------------------------
-    // PRIMEIROS OBSTÁCULOS
-    // --------------------------------------------------------
+    setTimeout(() => {
+        if (gameRunning) {
+            spawnObstacle(390);
+        }
+    }, 500);
 
-    spawnObstacle(
-        95
-    );
-
-
-    spawnObstacle(
-        190
-    );
-
-
-    spawnObstacle(
-        290
-    );
-
-
-    // --------------------------------------------------------
-    // MAIS OBSTÁCULOS INICIAIS
-    // --------------------------------------------------------
-
-    setTimeout(
-        () => {
-
-            if (gameRunning) {
-
-                spawnObstacle(
-                    390
-                );
-            }
-
-        },
-        500
-    );
-
-
-    setTimeout(
-        () => {
-
-            if (gameRunning) {
-
-                spawnObstacle(
-                    500
-                );
-            }
-
-        },
-        1000
-    );
-
+    setTimeout(() => {
+        if (gameRunning) {
+            spawnObstacle(500);
+        }
+    }, 1000);
 
     updateHUD();
 }
+
 
 
 // ============================================================
