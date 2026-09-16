@@ -932,55 +932,31 @@ function createMountain() {
 // ============================================================
 // LOOP INFINITO DO MUNDO
 // ============================================================
-
 function updateInfiniteWorld() {
+    if (!car || !roadGroup) return;
 
-    if (
-        !car ||
-        !roadGroup
-    ) {
-        return;
-    }
-
-
+    /*
+     * Descobre o segmento que está mais à frente
+     * do jogador.
+     */
     let furthestZ = Infinity;
 
-
-    // --------------------------------------------------------
-    // ENCONTRA O SEGMENTO MAIS DISTANTE
-    // --------------------------------------------------------
-
-    for (
-        const segment of roadGroup.children
-    ) {
-
-        if (
-            segment.position.z <
-            furthestZ
-        ) {
-
-            furthestZ =
-                segment.position.z;
+    for (const segment of roadGroup.children) {
+        if (segment.position.z < furthestZ) {
+            furthestZ = segment.position.z;
         }
     }
 
-
-    // --------------------------------------------------------
-    // REPOSICIONA SEGMENTOS QUE FICARAM PARA TRÁS
-    // --------------------------------------------------------
-
-    for (
-        const segment of roadGroup.children
-    ) {
-
+    /*
+     * Quando um segmento fica muito atrás do carro,
+     * coloca ele novamente no final da estrada.
+     */
+    for (const segment of roadGroup.children) {
         if (
             segment.position.z >
             car.position.z + 70
         ) {
-
-            furthestZ -=
-                ROAD_SEGMENT_LENGTH;
-
+            furthestZ -= ROAD_SEGMENT_LENGTH;
 
             segment.position.z =
                 furthestZ;
@@ -2067,7 +2043,10 @@ function updateHUD() {
 // INICIAR JOGO
 // ============================================================
 function startGame() {
-    // Remove todos os obstáculos antigos
+    // ============================================================
+    // REMOVE OBSTÁCULOS ANTIGOS
+    // ============================================================
+
     for (const obstacle of obstacles) {
         obstacleGroup.remove(obstacle);
     }
@@ -2075,7 +2054,7 @@ function startGame() {
     obstacles.length = 0;
 
     // ============================================================
-    // RESET DO JOGO
+    // RESET DOS VALORES
     // ============================================================
 
     score = 0;
@@ -2102,19 +2081,25 @@ function startGame() {
 
     if (roadGroup) {
         roadGroup.children.forEach((segment, index) => {
+            /*
+             * O primeiro segmento começa exatamente abaixo
+             * do carro e os demais continuam para frente.
+             *
+             * Como cada segmento tem 60 unidades:
+             *
+             * segmento 0 = z 5
+             * segmento 1 = z -55
+             * segmento 2 = z -115
+             * segmento 3 = z -175
+             * ...
+             */
+
             segment.position.z =
-                -index * ROAD_SEGMENT_LENGTH;
+                car.position.z -
+                index * ROAD_SEGMENT_LENGTH;
         });
     }
 
-    // ============================================================
-    // RESET DO CENÁRIO
-    // ============================================================
-
-    // Como árvores, arbustos e montanhas estão dentro
-    // dos próprios segmentos da estrada, eles acompanham
-    // automaticamente o reset acima.
-    
     // ============================================================
     // INICIA O JOGO
     // ============================================================
