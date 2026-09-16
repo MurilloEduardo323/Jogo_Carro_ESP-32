@@ -1,4 +1,3 @@
-
 const THREE = window.THREE;
 
 const gameContainer = document.getElementById("game");
@@ -71,8 +70,10 @@ let carX = 0;
 let targetCarX = 0;
 
 let lastSerialInput = 0;
+let lastBleInput = 0;
 
 const SERIAL_TIMEOUT = 500;
+const BLE_TIMEOUT = 500;
 
 const ROAD_LIMIT = 4.8;
 
@@ -88,10 +89,8 @@ const obstacles = [];
 
 const MAX_OBSTACLES = 22;
 
-// Intervalo atual entre geração de obstáculos
 let obstacleTimer = 0;
 
-// Começamos com bastante espaço
 let obstacleInterval = 2.2;
 
 
@@ -102,6 +101,26 @@ let obstacleInterval = 2.2;
 let port = null;
 let reader = null;
 let serialConnected = false;
+
+
+// ============================================================
+// BLUETOOTH BLE
+// ============================================================
+
+const BLE_DEVICE_NAME = "ESP32-Volante";
+
+const BLE_SERVICE_UUID =
+    "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
+
+const BLE_CHARACTERISTIC_UUID =
+    "beb5483e-36e1-4688-b7f5-ea07361b26a8";
+
+let bleDevice = null;
+let bleServer = null;
+let bleService = null;
+let bleCharacteristic = null;
+
+let bleConnected = false;
 
 
 // ============================================================
@@ -238,6 +257,7 @@ function init() {
 
 
     if (startBtn) {
+
         startBtn.addEventListener(
             "click",
             startGame
@@ -246,9 +266,10 @@ function init() {
 
 
     if (connectBtn) {
+
         connectBtn.addEventListener(
             "click",
-            connectSerial
+            connectController
         );
     }
 
@@ -1155,16 +1176,6 @@ function spawnObstacle(
 
 function getNextObstacleDistance() {
 
-    /*
-        Quanto maior a velocidade,
-        maior a distância física entre
-        obstáculos.
-
-        Isso evita que o jogo fique
-        impossível em alta velocidade.
-    */
-
-
     const speedFactor =
         (gameSpeed - 22) /
         (maxGameSpeed - 22);
@@ -1222,12 +1233,6 @@ function isTooCloseToAnotherObstacle(
             );
 
 
-        /*
-            Mantemos distância lateral
-            suficiente para sempre existir
-            pelo menos uma passagem.
-        */
-
         if (
             dx < 2.0 &&
             dz < 25
@@ -1247,16 +1252,6 @@ function isTooCloseToAnotherObstacle(
 // ============================================================
 
 function updateObstacles(dt) {
-
-    /*
-        IMPORTANTE:
-
-        Os obstáculos ficam PARADOS
-        no mundo.
-
-        Quem anda é o carro.
-    */
-
 
     for (
         let i = obstacles.length - 1;
@@ -1314,13 +1309,6 @@ function updateObstacles(dt) {
     obstacleTimer += dt;
 
 
-    /*
-        O intervalo diminui conforme
-        a velocidade aumenta.
-
-        Mas nunca chega perto de zero.
-    */
-
     const speedFactor =
         (gameSpeed - 22) /
         (maxGameSpeed - 22);
@@ -1355,10 +1343,26 @@ function updateSteering(dt) {
         keyboardSteer;
 
 
+    // --------------------------------------------------------
+    // PRIORIDADE PARA BLE
+    // --------------------------------------------------------
+
     if (
+        bleConnected &&
+        Date.now() - lastBleInput < BLE_TIMEOUT
+    ) {
+
+        currentSteer =
+            steer;
+    }
+
+    // --------------------------------------------------------
+    // SERIAL COMO ALTERNATIVA
+    // --------------------------------------------------------
+
+    else if (
         serialConnected &&
-        Date.now() - lastSerialInput <
-            SERIAL_TIMEOUT
+        Date.now() - lastSerialInput < SERIAL_TIMEOUT
     ) {
 
         currentSteer =
@@ -1447,11 +1451,6 @@ function checkCollisions() {
                     obstacle
                 );
 
-
-        /*
-            Pequena tolerância para
-            deixar a colisão mais justa.
-        */
 
         const collisionBox =
             obstacleBox.clone();
@@ -1567,13 +1566,6 @@ function updateHUD() {
 
 
     if (speedEl) {
-
-        /*
-            Conversão visual para km/h.
-
-            22 unidades ≈ 66 km/h
-            80 unidades ≈ 240 km/h
-        */
 
         speedEl.textContent =
             Math.round(
@@ -1781,6 +1773,330 @@ function handleKeyUp(event) {
 
 
 // ============================================================
+// BOTÃO DE CONEXÃO
+// ============================================================
+
+async function connectController() {
+
+    // Se já estiver conectado via BLE, desconecta
+    if (bleConnected) {
+
+        disconnectBluetooth();
+
+        return;
+    }
+
+
+    // Se o navegador não tiver Web Bluetooth,
+    // tenta conectar via Serial
+    if (
+        !("bluetooth" in navigator)
+    ) {
+
+        console.warn(
+            "Web Bluetooth não disponível. Tentando Web Serial."
+        );
+
+        await connectSerial();
+
+        return;
+    }
+
+
+    await connectBluetooth();
+}
+
+
+// ============================================================
+// BLUETOOTH BLE
+// ============================================================
+
+async function connectBluetooth() {
+
+    if (
+        !("bluetooth" in navigator)
+    ) {
+
+        alert(
+            "Seu navegador não suporta Bluetooth BLE."
+        );
+
+        return;
+    }
+
+
+    try {
+
+        updateConnectionStatus(
+            "🔎 Procurando ESP32..."
+        );
+
+
+        bleDevice =
+            await navigator.bluetooth.requestDevice({
+
+                filters: [
+                    {
+                        name: BLE_DEVICE_NAME
+                    }
+                ],
+
+                optionalServices: [
+                    BLE_SERVICE_UUID
+                ]
+            });
+
+
+        if (!bleDevice) {
+
+            throw new Error(
+                "Nenhum dispositivo selecionado."
+            );
+        }
+
+
+        bleDevice.addEventListener(
+            "gattserverdisconnected",
+            handleBluetoothDisconnect
+        );
+
+
+        updateConnectionStatus(
+            "🔗 Conectando ao ESP32..."
+        );
+
+
+        bleServer =
+            await bleDevice.gatt.connect();
+
+
+        bleService =
+            await bleServer.getPrimaryService(
+                BLE_SERVICE_UUID
+            );
+
+
+        bleCharacteristic =
+            await bleService.getCharacteristic(
+                BLE_CHARACTERISTIC_UUID
+            );
+
+
+        await bleCharacteristic.startNotifications();
+
+
+        bleCharacteristic.addEventListener(
+            "characteristicvaluechanged",
+            receiveBluetoothData
+        );
+
+
+        bleConnected = true;
+
+        steer = 0;
+
+        lastBleInput = Date.now();
+
+
+        updateConnectionStatus(
+            "🎮 Volante conectado via Bluetooth"
+        );
+
+
+        if (connectBtn) {
+
+            connectBtn.textContent =
+                "DESCONECTAR VOLANTE";
+        }
+
+
+        console.log(
+            "✅ ESP32 conectado via BLE"
+        );
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "Erro ao conectar via BLE:",
+            error
+        );
+
+
+        bleConnected = false;
+
+        bleDevice = null;
+        bleServer = null;
+        bleService = null;
+        bleCharacteristic = null;
+
+
+        updateConnectionStatus(
+            "Volante não conectado"
+        );
+
+
+        alert(
+            "Não foi possível conectar ao ESP32 via Bluetooth."
+        );
+    }
+}
+
+
+// ============================================================
+// RECEBE DADOS DO ESP32 VIA BLE
+// ============================================================
+
+function receiveBluetoothData(event) {
+
+    try {
+
+        const value =
+            event.target.value;
+
+
+        const decoder =
+            new TextDecoder("utf-8");
+
+
+        const text =
+            decoder.decode(value).trim();
+
+
+        const numericValue =
+            parseInt(
+                text,
+                10
+            );
+
+
+        if (
+            Number.isNaN(numericValue)
+        ) {
+            return;
+        }
+
+
+        steer =
+            THREE.MathUtils.clamp(
+                numericValue,
+                -100,
+                100
+            );
+
+
+        lastBleInput =
+            Date.now();
+
+
+        updateHUD();
+
+
+    } catch (error) {
+
+        console.error(
+            "Erro ao interpretar dados BLE:",
+            error
+        );
+    }
+}
+
+
+// ============================================================
+// DESCONECTAR BLUETOOTH
+// ============================================================
+
+function disconnectBluetooth() {
+
+    try {
+
+        if (
+            bleDevice &&
+            bleDevice.gatt.connected
+        ) {
+
+            bleDevice.gatt.disconnect();
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Erro ao desconectar BLE:",
+            error
+        );
+    }
+
+
+    bleConnected = false;
+
+    bleServer = null;
+    bleService = null;
+    bleCharacteristic = null;
+
+    steer = 0;
+
+    updateConnectionStatus(
+        "Volante desconectado"
+    );
+
+
+    if (connectBtn) {
+
+        connectBtn.textContent =
+            "CONECTAR VOLANTE";
+    }
+}
+
+
+// ============================================================
+// DESCONECTOU BLUETOOTH
+// ============================================================
+
+function handleBluetoothDisconnect() {
+
+    bleConnected = false;
+
+    bleServer = null;
+    bleService = null;
+    bleCharacteristic = null;
+
+    steer = 0;
+
+
+    updateConnectionStatus(
+        "Volante Bluetooth desconectado"
+    );
+
+
+    if (connectBtn) {
+
+        connectBtn.textContent =
+            "CONECTAR VOLANTE";
+    }
+
+
+    console.warn(
+        "⚠️ ESP32 desconectado do Bluetooth"
+    );
+}
+
+
+// ============================================================
+// STATUS DE CONEXÃO
+// ============================================================
+
+function updateConnectionStatus(text) {
+
+    if (serialStatus) {
+
+        serialStatus.textContent =
+            text;
+    }
+}
+
+
+// ============================================================
 // SERIAL
 // ============================================================
 
@@ -1815,7 +2131,14 @@ async function connectSerial() {
         if (serialStatus) {
 
             serialStatus.textContent =
-                "🎮 Volante conectado";
+                "🎮 Volante conectado via USB";
+        }
+
+
+        if (connectBtn) {
+
+            connectBtn.textContent =
+                "DESCONECTAR VOLANTE";
         }
 
 
@@ -1939,6 +2262,9 @@ async function readSerial() {
 
                         lastSerialInput =
                             Date.now();
+
+
+                        updateHUD();
                     }
                 }
 
@@ -1962,7 +2288,14 @@ async function readSerial() {
         if (serialStatus) {
 
             serialStatus.textContent =
-                "Volante desconectado";
+                "Volante USB desconectado";
+        }
+
+
+        if (connectBtn) {
+
+            connectBtn.textContent =
+                "CONECTAR VOLANTE";
         }
     }
 }

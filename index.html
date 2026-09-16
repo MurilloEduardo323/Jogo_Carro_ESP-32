@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -62,9 +61,8 @@
 
 
     <!-- =========================================================
-         CONTROLE DO VOLANTE / SERIAL
+         STATUS DO VOLANTE
          ========================================================= -->
-
     <div
         id="serialStatus"
         class="serial-status"
@@ -73,6 +71,9 @@
     </div>
 
 
+    <!-- =========================================================
+         CONTROLE DO VOLANTE
+         ========================================================= -->
     <div class="controls">
 
         <button
@@ -88,7 +89,6 @@
     <!-- =========================================================
          MENSAGEM / INÍCIO / GAME OVER
          ========================================================= -->
-
     <div
         id="message"
         class="message"
@@ -108,7 +108,7 @@
             </h1>
 
             <p id="messageText">
-                Conecte o volante e clique em iniciar para jogar.
+                Conecte o volante via Bluetooth e clique em iniciar para jogar.
             </p>
 
             <button
@@ -126,7 +126,6 @@
     <!-- =========================================================
          THREE.JS + GLTFLOADER
          ========================================================= -->
-
     <script type="module">
 
         import * as THREE from "three";
@@ -137,14 +136,8 @@
 
 
         /*
-         * O game.js é um script JavaScript normal.
-         *
-         * Por isso disponibilizamos:
-         *
-         * window.THREE
-         * window.GLTFLoader
-         *
-         * para que ele consiga utilizar os dois.
+         * Disponibiliza o Three.js e o GLTFLoader
+         * para o game.js.
          */
 
         window.THREE = THREE;
@@ -153,18 +146,14 @@
 
 
         /*
-         * Carrega o game.js somente depois que:
-         *
-         * THREE
-         * GLTFLoader
-         *
-         * já estão disponíveis.
+         * Carrega o game.js somente depois que
+         * THREE e GLTFLoader estiverem disponíveis.
          */
 
         const gameScript =
             document.createElement("script");
 
-        gameScript.src = "game.js";
+        gameScript.src = "./game.js";
 
         gameScript.onload = function () {
 
@@ -188,4 +177,3 @@
 
 </body>
 </html>
-```
